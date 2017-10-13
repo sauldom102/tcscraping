@@ -7,6 +7,8 @@ num_pages = input('Number of pages to get: ')
 crushes_num = 0
 anon_num = 0
 
+priv_crush = 0
+
 out_file = open('{}.txt'.format(user),'a')
 
 for num_page in range(int(num_pages)):
@@ -46,12 +48,25 @@ for num_page in range(int(num_pages)):
                     anon_num += 1
                 crushes_num += 1
             except AttributeError as e:
+                try:
+                    if len(box.find('p').find('i').text) > 0:
+                        out_file.write('Private\n\n')
+                        priv_crush += 1
+                except AttributeError:
+                    pass
                 pass
             except IndexError as e:
-                 pass
+                try:
+                    if len(box.find('p').find('i').text) > 0:
+                        out_file.write('Private\n\n')
+                        priv_crush += 1
+                except AttributeError:
+                    pass
+                pass
     else:
         break
 
+print('{} private crushes'.format(priv_crush))
 print('Got',crushes_num,'crushes')
 print('{} ({:.2%}) crushes are anonymous'.format(anon_num,anon_num/crushes_num))
 

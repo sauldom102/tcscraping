@@ -8,6 +8,7 @@ crushes_num = 0
 anon_num = 0
 
 priv_crush = 0
+likes = 0
 
 out_file = open('{}.txt'.format(user),'a')
 
@@ -32,6 +33,10 @@ for num_page in range(int(num_pages)):
                 msg_author = msg[1][1:].encode('utf-8')
                 msg_date = box.find('span').text[13:]
 
+                if msg_content == b'Quick Like -I like you!':
+                    msg_content = 'Like'
+                    likes += 1
+
                 # Obtaining month, day, time and year
                 date_broken = msg_date.split()
                 month = date_broken[0]
@@ -52,6 +57,7 @@ for num_page in range(int(num_pages)):
                     if len(box.find('p').find('i').text) > 0:
                         out_file.write('Private\n\n')
                         priv_crush += 1
+                        crushes_num += 1
                 except AttributeError:
                     pass
                 pass
@@ -60,14 +66,15 @@ for num_page in range(int(num_pages)):
                     if len(box.find('p').find('i').text) > 0:
                         out_file.write('Private\n\n')
                         priv_crush += 1
+                        crushes_num += 1
                 except AttributeError:
                     pass
                 pass
     else:
         break
-
-print('{} private crushes'.format(priv_crush))
-print('Got',crushes_num,'crushes')
+print('{} has {} likes'.format(user,likes))
+print('Got',crushes_num-likes,'crush posts')
+print('{} crushes are private'.format(priv_crush))
 print('{} ({:.2%}) crushes are anonymous'.format(anon_num,anon_num/crushes_num))
 
 out_file.close()

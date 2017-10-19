@@ -52,7 +52,7 @@ for num_page in range(int(num_pages)):
                 if msg_author == b'Anonymous':
                     anon_num += 1
                 crushes_num += 1
-            except AttributeError as e:
+            except (AttributeError, IndexError) as e:
                 try:
                     if len(box.find('p').find('i').text) > 0:
                         out_file.write('Private\n\n')
@@ -60,16 +60,6 @@ for num_page in range(int(num_pages)):
                         crushes_num += 1
                 except AttributeError:
                     pass
-                pass
-            except IndexError as e:
-                try:
-                    if len(box.find('p').find('i').text) > 0:
-                        out_file.write('Private\n\n')
-                        priv_crush += 1
-                        crushes_num += 1
-                except AttributeError:
-                    pass
-                pass
     else:
         break
 

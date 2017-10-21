@@ -7,6 +7,6 @@ setup(name='thiscrush-scraping',
       author_email='saulydominguez@gmail.com',
       url='https://github.com/sauldom102/thiscrush-scraping',
       classifiers=[],
-      packages=['thiscrush'],
+      packages=[],
       install_requires=['requests','bs4'],
       )

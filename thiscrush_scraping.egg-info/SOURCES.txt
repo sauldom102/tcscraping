@@ -1,5 +1,0 @@
-README.md
-thiscrush_scraping.egg-info/PKG-INFO
-thiscrush_scraping.egg-info/SOURCES.txt
-thiscrush_scraping.egg-info/dependency_links.txt
-thiscrush_scraping.egg-info/top_level.txt

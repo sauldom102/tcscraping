@@ -1,16 +1,11 @@
 import requests
 from bs4 import BeautifulSoup
 
-def clean_text(text):
-    return text.strip().replace('\t', '').replace('\r\n', '')
-
 class Main():
 
     def __init__(self,user,num_pages):
         self.user = user
         self.num_pages = num_pages
-
-        self.posts = list()
 
         self.crushes_num = 0
         self.anon_num = 0
@@ -26,26 +21,24 @@ class Main():
 
             soup = BeautifulSoup(page, 'lxml')
 
-            boxes = soup.find('div',{'id':'content'}).findAll('div',{'class':'post'})
-
-            # print(boxes[0])
+            boxes = soup.find('div',{'class':'row-4'}).find_all('div',{'class':'row'})
 
             if len(boxes) > 1:
                 for box in boxes:
                     try:
+                        msg = box.find("p").text.strip().replace('\t','').replace('\r\n','').split('\n')
+                        try:
+                            msg.remove('')
+                        except ValueError:
+                            pass
 
                         # Obtaining message content, message author and message date
-                        msg_content = clean_text(box.find('p',{'class':'txt-user-crush'}).text).encode('utf-8')
-                        msg_author = clean_text(box.find('div', {'class':'col-xs-8 col-sm-8'}).find('p', {'class':'no-margin'}).text).encode('utf-8')
-                        msg_date = clean_text(box.find('div', {'class':'col-xs-8 col-sm-8'}).find('p', {'class':'posted-date-time txt-grey'}).text)
+                        msg_content = msg[0].encode('utf-8')
+                        msg_author = msg[1][1:].encode('utf-8')
+                        msg_date = box.find('span').text[13:]
 
-                        data = {
-                            'to_user': self.user,
-                        }
-
-                        if msg_content == b'I like you!':
+                        if msg_content == b'Quick Like -I like you!':
                             msg_content = 'Like'
-                            data['type'] = 'Like'
                             self.likes += 1
 
                         # Obtaining month, day, time and year
@@ -54,17 +47,6 @@ class Main():
                         day = date_broken[1][:-1]
                         year = date_broken[2]
                         time = date_broken[3]
-                        time_broken = time.split(':')
-                        hour = time_broken[0]
-                        minute = time_broken[1][:-2] + time_broken[1][-2:].upper()
-
-                        data['datetime'] = {
-                            'month': month,
-                            'day': day,
-                            'year': year,
-                            'hour': hour,
-                            'minute': minute,
-                        }
 
                         out_file.write('{} - {} - {} | {}\n'.format(day,month,year,time))
                         out_file.write('{}\n'.format(msg_content))
@@ -72,30 +54,16 @@ class Main():
                         out_file.write('\n')
 
                         if msg_author == b'Anonymous':
-                            if msg_content == 'I like you!' and msg_author.startswith('Quick Like -'):
-                                data['type'] = 'Like'
-                                data['author'] = 'Anonymous'
-                            else:
-                                data['type'] = 'Anonymous'
-                                data['content'] = msg_content
                             self.anon_num += 1
-                        else:
-                            data['type'] = 'Public'
-                            data['author'] = msg_author
-                            data['content'] = msg_content
-
                         self.crushes_num += 1
-                    except (AttributeError, IndexError):
+                    except (AttributeError, IndexError) as e:
                         try:
                             if len(box.find('p').find('i').text) > 0:
                                 out_file.write('Private\n\n')
-                                data['type'] = 'Private'
                                 self.priv_crush += 1
                                 self.crushes_num += 1
                         except AttributeError:
                             pass
-
-                    self.posts.append(data)
             else:
                 break
 

@@ -8,5 +8,4 @@ setup(name='thiscrush-scraping',
       url='https://github.com/sauldom102/thiscrush-scraping',
       classifiers=[],
       packages=[],
-      install_requires=['requests','bs4'],
       )

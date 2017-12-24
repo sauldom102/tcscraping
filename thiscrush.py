@@ -1,8 +1,10 @@
 import requests
 from bs4 import BeautifulSoup
 
+
 def clean_text(text):
     return text.strip().replace('\t', '').replace('\r\n', '')
+
 
 class Main():
 
@@ -19,16 +21,13 @@ class Main():
         self.likes = 0
 
     def get(self):
-        out_file = open('{}.txt'.format(self.user),'a')
 
         for num_page in range(int(self.num_pages)):
             page = requests.get('http://www.thiscrush.com/~{}/{}'.format(str(self.user),str(num_page+1))).content
 
             soup = BeautifulSoup(page, 'lxml')
 
-            boxes = soup.find('div',{'id':'content'}).findAll('div',{'class':'post'})
-
-            # print(boxes[0])
+            boxes = soup.find('div',{'id':'content'}).find_all('div',{'class':'post'})
 
             if len(boxes) > 1:
                 for box in boxes:
@@ -43,10 +42,18 @@ class Main():
                             'to_user': self.user,
                         }
 
-                        if msg_content == b'I like you!':
-                            msg_content = 'Like'
+                        if msg_content == b'I like you!' and msg_author.startswith(b'Quick Like -'):
                             data['type'] = 'Like'
+                            data['author'] = msg_author[11:]
                             self.likes += 1
+                        elif msg_author == b'Anonymous':
+                            data['type'] = 'Anonymous'
+                            data['content'] = msg_content
+                            self.anon_num += 1
+                        else:
+                            data['type'] = 'Public'
+                            data['author'] = msg_author
+                            data['content'] = msg_content
 
                         # Obtaining month, day, time and year
                         date_broken = msg_date.split()
@@ -66,29 +73,10 @@ class Main():
                             'minute': minute,
                         }
 
-                        out_file.write('{} - {} - {} | {}\n'.format(day,month,year,time))
-                        out_file.write('{}\n'.format(msg_content))
-                        out_file.write('{}\n'.format(msg_author))
-                        out_file.write('\n')
-
-                        if msg_author == b'Anonymous':
-                            if msg_content == 'I like you!' and msg_author.startswith('Quick Like -'):
-                                data['type'] = 'Like'
-                                data['author'] = 'Anonymous'
-                            else:
-                                data['type'] = 'Anonymous'
-                                data['content'] = msg_content
-                            self.anon_num += 1
-                        else:
-                            data['type'] = 'Public'
-                            data['author'] = msg_author
-                            data['content'] = msg_content
-
                         self.crushes_num += 1
                     except (AttributeError, IndexError):
                         try:
                             if len(box.find('p').find('i').text) > 0:
-                                out_file.write('Private\n\n')
                                 data['type'] = 'Private'
                                 self.priv_crush += 1
                                 self.crushes_num += 1
@@ -103,5 +91,3 @@ class Main():
         print('Got',self.crushes_num-self.likes,'crush posts')
         print('{} crushes are private'.format(self.priv_crush))
         print('{} ({:.2%}) crushes are anonymous'.format(self.anon_num,self.anon_num/self.crushes_num))
-
-        out_file.close()

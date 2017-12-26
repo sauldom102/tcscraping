@@ -8,8 +8,8 @@ def clean_text(text):
 
 class Main():
 
-    def __init__(self,user):
-        self.username = user
+    def __init__(self,username):
+        self.username = username
 
         self.posts = list()
 
@@ -97,6 +97,6 @@ class Main():
 
         soup = BeautifulSoup(user_page, 'lxml')
 
-        self.crushes_num = soup.find('p', {'class':'tag-statistics txt-pink'}).text
+        self.crushes_num = int(soup.find_all('p', {'class':'tag-statistics txt-pink'})[2].text)
 
         return self.crushes_num

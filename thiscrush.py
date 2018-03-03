@@ -1,12 +1,22 @@
 import requests
 from bs4 import BeautifulSoup
 from math import ceil
+import re
 
 def clean_text(text):
     return text.strip().replace('\t', '').replace('\r\n', '')
 
+# This function is to get some words that people write with '@' and an email protection encrypts
+def decodeEmail(e):
+    de = ""
+    k = int(e[:2], 16)
 
-class Main():
+    for i in range(2, len(e)-1, 2):
+        de += chr(int(e[i:i+2], 16)^k)
+
+    return de
+
+class ThisCrush:
 
     def __init__(self,username):
         self.username = username
@@ -20,8 +30,7 @@ class Main():
         self.likes = 0
 
     def get_page(self, num_page):
-
-        page = requests.get('http://www.thiscrush.com/~{}/{}'.format(str(self.username),str(num_page+1))).content
+        page = requests.get('http://www.thiscrush.com/~{}/{}'.format(self.username,num_page+1)).content
 
         soup = BeautifulSoup(page, 'lxml')
 
@@ -29,16 +38,24 @@ class Main():
 
         if len(boxes) > 1:
             for box in boxes:
+
+                data = {
+                    'to_user': self.username,
+                }
+
                 try:
 
                     # Obtaining message content, message author and message date
-                    msg_content = clean_text(box.find('p',{'class':'txt-user-crush'}).text).encode('utf-8')
+                    msg_tag = box.find('p',{'class':'txt-user-crush'})
+                    fake_email = msg_tag.find_all('a', {'class': '__cf_email__'})
+                    msg_pattern = r'.*(\[email_protected\]).*'
+
+                    msg_content = clean_text(msg_tag.text).encode('utf-8')
                     msg_author = clean_text(box.find('div', {'class':'col-xs-8 col-sm-8'}).find('p', {'class':'no-margin'}).text).encode('utf-8')
                     msg_date = clean_text(box.find('div', {'class':'col-xs-8 col-sm-8'}).find('p', {'class':'posted-date-time txt-grey'}).text)
 
-                    data = {
-                        'to_user': self.username,
-                    }
+                    print('Fake email: {}'.format(len(fake_email)))
+                    print(re.match(msg_pattern, msg_content).groups())
 
                     if msg_content == b'I like you!' and msg_author.startswith(b'Quick Like -'):
                         data['type'] = 'Like'
@@ -83,11 +100,8 @@ class Main():
                         pass
 
                 self.posts.append(data)
-        else:
-            return
 
     def get_crushes(self, num_crushes):
-
         for p in range(ceil(num_crushes/10)):
             self.get_page(p)
 

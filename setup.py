@@ -1,6 +1,6 @@
 from distutils.core import setup
 
-setup(name='thiscrush-scraping',
+setup(name='tcscraping',
       version='1.0',
       description='A thiscrush scraper',
       author='Saul Dominguez',

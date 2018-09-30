@@ -7,5 +7,5 @@ setup(name='tcscraping',
       author_email='saulydominguez@gmail.com',
       url='https://github.com/sauldom102/thiscrush-scraping',
       classifiers=[],
-      packages=[],
+      packages=['tcscraping', ],
       )

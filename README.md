@@ -1,3 +1,2 @@
 ## Requirements
-This program makes use of *requests* and *bs4* libraries.
-You can easily install both with pip package manager (`pip install (library name)`)
+This program makes use of [requests_html](https://html.python-requests.org/)
